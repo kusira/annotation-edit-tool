@@ -30,7 +30,7 @@ export default function Home() {
       if (parts.length < 3) return; // 想定するパス形式でない場合はスキップ
 
       const date = parts[1]; // 日付 (例: 240105)
-      const filenameWithExtension = parts[3]?.split("_")[0]; // 時間部分を取得 (例: 240105-060323)
+      const filenameWithExtension = parts[3]?.split("_")[0]; // 時間部分を取得
       const filename = filenameWithExtension?.split(".")[0]; // 拡張子を除去したファイル名
 
       if (!filename) return; // ファイル名がない場合はスキップ
@@ -75,6 +75,21 @@ export default function Home() {
       handleDirectoryStructure(filePaths);
       handleImageDictionary(files);
       await handleLandmarkDictionary(filteredFiles); // Async処理に変更
+
+      // すべてのキー（日付）を取得
+      const dates = Object.keys(directoryStructure);
+
+      // 一番古い日時を取得してcurrentDayを設定
+      if (dates.length > 0) {
+        const oldestDate = dates.reduce((a, b) => (a < b ? a : b)); // 一番古い日付を取得
+        const filenames = Object.keys(directoryStructure[oldestDate]);
+
+        if (filenames.length > 0) {
+          // 一番古いファイル名を持つキーを見つける
+          const oldestFile = filenames.reduce((a, b) => (a < b ? a : b));
+          setCurrentDay(oldestFile); // currentDayを最初の日時に設定
+        }
+      }
     }
   };
 
@@ -85,12 +100,14 @@ export default function Home() {
 
   // ディレクトリ辞書
   const handleDirectoryStructure = (filePaths: string[]) => {
+    // 情報がないときだけ更新
     if (Object.keys(directoryStructure).length == 0) {
       const dict = buildDirectoryStructure(filePaths);
       setDirectoryStructure(dict); // ディレクトリ構造の状態をセット
       console.log("--- directory ---");
       console.log(JSON.stringify(dict, null, 2));
     }
+
   };
 
   // 画像辞書
@@ -169,10 +186,10 @@ export default function Home() {
         {/* 左側: 編集部 */}
         <div className="mx-auto w-max">
           <CheckBoxForm />
-          <LandmarkEdit 
-            imageDict={imageDict} 
+          <LandmarkEdit
+            imageDict={imageDict}
             landmarkDict={landmarkDict}
-            currentDay={currentDay} 
+            currentDay={currentDay}
           />
         </div>
 

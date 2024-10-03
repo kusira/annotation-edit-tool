@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CanvasLandmarks from "./canvasLandmark";
+import { Button } from "@/components/ui/button";
 
 export const LandmarkEdit = ({
   imageDict,
@@ -10,6 +11,9 @@ export const LandmarkEdit = ({
   landmarkDict: { [key: string]: number[][] };
   currentDay: string;
 }) => {
+  // モード
+  const [mode, setMode] = useState<string>("move");
+
   // コントラストと明るさの状態を管理
   const [contrast, setContrast] = useState<number>(100);
   const [brightness, setBrightness] = useState<number>(100);
@@ -30,6 +34,11 @@ export const LandmarkEdit = ({
   // 明るさの変更時に呼ばれる関数
   const handleBrightnessChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBrightness(Number(e.target.value));
+  };
+
+  // モードの切り替え時に呼ばれる関数
+  const handleModeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMode(e.target.value);
   };
 
   return (
@@ -84,15 +93,38 @@ export const LandmarkEdit = ({
           style={{ filter: `contrast(${contrast}%) brightness(${brightness}%)` }}
         />
 
-        {landmarkDict[`${currentDay}.csv`] &&
+        {landmarkDict[`${currentDay}.csv`] && (
           <CanvasLandmarks
-            imageWidth={320 * magnification}
-            imageHeight={256 * magnification}
+            imageWidth={320}
+            imageHeight={256}
             points={landmarkDict[`${currentDay}.csv`]}
             magnification={magnification}
+            currentDay={currentDay}
+            mode={mode}
           />
-        }
+        )}
 
+        {/* モード切り替え用のラジオボタン */}
+        <div className="absolute bottom-2 right-2 flex flex-col gap-2 bg-white p-2 rounded-xl z-[100]">
+          <label className="cursor-pointer">
+            <input
+              type="radio"
+              value="move"
+              checked={mode === "move"}
+              onChange={handleModeChange}
+            />
+            Move
+          </label>
+          <label className="cursor-pointer">
+            <input
+              type="radio"
+              value="brush"
+              checked={mode === "brush"}
+              onChange={handleModeChange}
+            />
+            Brush
+          </label>
+        </div>
       </div>
     </div>
   );
