@@ -14,10 +14,12 @@ export default function Home() {
 
   // ファイルの読み込み
   const [files, setFiles] = useState<File[]>();
-  // 現在みている画像
+  // 現在見ている画像
   const [currentDay, setCurrentDay] = useState<string>("");
-  // 画像辞書 // key例: thermo-240105-060323
+  // 画像辞書
   const [imageDict, setImageDict] = useState<{ [key: string]: string }>({});
+  // 特徴点辞書
+  const [landmarkDict, setLandmarkDict] = useState<{ [key: string]: number[][] }>({});
 
   // 入力されたファイルからディレクトリ構造を作成
   function buildDirectoryStructure(paths: string[]): DirectoryStructure {
@@ -59,47 +61,92 @@ export default function Home() {
     return structure;
   }
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ファイル入力時
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-
-      // 不要なファイルをフィルタリング (例: .DS_Storeを除外)
-      const filteredFiles = files.filter((file) => !file.name.startsWith("."));
+      const filteredFiles = filterFiles(files);
 
       console.log("--- files ---");
       console.log(files);
       setFiles(files);
 
       const filePaths = filteredFiles.map((file) => (file as File).webkitRelativePath);
-
-      // `webkitRelativePath`が取得できているか確認
-      if (filePaths.some((path) => !path)) {
-        console.warn("webkitRelativePathがサポートされていません");
-      } else {
-        if (!directoryStructure) {
-          const dict = buildDirectoryStructure(filePaths);
-          setDirectoryStructure(dict); // ディレクトリ構造の状態をセット
-          console.log("--- directory ---");
-          console.log(JSON.stringify(dict, null, 2));
-        }
-      }
-
-      // 画像辞書を生成
-      const tempImageDict: { [key: string]: string } = {};
-      files.forEach((file) => {
-        console.log(file)
-        if (file.type === "image/png") { // PNGファイルをフィルタリング
-          const url = URL.createObjectURL(file);
-          console.log(file.webkitRelativePath);
-          const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
-
-          tempImageDict[key] = url; // 辞書にURLを格納
-        }
-      });
-      setImageDict(tempImageDict);
-      console.log("--- image dict ---");
-      console.log(JSON.stringify(tempImageDict, null, 2));
+      handleDirectoryStructure(filePaths);
+      handleImageDictionary(files);
+      await handleLandmarkDictionary(filteredFiles); // Async処理に変更
     }
+  };
+
+  const filterFiles = (files: File[]) => {
+    // 不要なファイルをフィルタリング (例: .DS_Storeを除外)
+    return files.filter((file) => !file.name.startsWith("."));
+  };
+
+  // ディレクトリ辞書
+  const handleDirectoryStructure = (filePaths: string[]) => {
+    if (Object.keys(directoryStructure).length == 0) {
+      const dict = buildDirectoryStructure(filePaths);
+      setDirectoryStructure(dict); // ディレクトリ構造の状態をセット
+      console.log("--- directory ---");
+      console.log(JSON.stringify(dict, null, 2));
+    }
+  };
+
+  // 画像辞書
+  const handleImageDictionary = (files: File[]) => {
+    const tempImageDict: { [key: string]: string } = {};
+    files.forEach((file) => {
+      if (file.type === "image/png") { // PNGファイルをフィルタリング
+        const url = URL.createObjectURL(file);
+        const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
+        tempImageDict[key] = url; // 辞書にURLを格納
+      }
+    });
+    setImageDict(tempImageDict);
+    console.log("--- image dict ---");
+    console.log(JSON.stringify(tempImageDict, null, 2));
+  };
+
+  // 特徴点辞書 (非同期処理)
+  const handleLandmarkDictionary = async (filteredFiles: File[]) => {
+    const tempLandmarkDict: { [key: string]: number[][] } = {};
+
+    await Promise.all(
+      filteredFiles.map(async (file) => {
+        if (file.name.endsWith(".csv")) { // CSVファイルをフィルタリング
+          const reader = new FileReader();
+          const filePromise = new Promise<void>((resolve) => {
+            reader.onload = (event) => {
+              const csvContent = event.target?.result as string;
+              const lines = csvContent.split("\n");
+              lines.forEach((line) => {
+                // thermo_landmark以降の部分を抽出
+                const thermoLandmarkIndex = line.indexOf("thermo_landmark");
+                if (thermoLandmarkIndex !== -1) {
+                  const dataString = line.substring(thermoLandmarkIndex).split('"')[1]; // 二重引用符の中の部分を取得
+                  try {
+                    const thermoLandmarkArray = JSON.parse(dataString); // JSONとして解析
+                    const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
+                    tempLandmarkDict[key] = thermoLandmarkArray; // 辞書にURLを格納
+                  } catch (error) {
+                    console.error("JSONの解析エラー:", error);
+                  }
+                }
+              });
+              resolve();
+            };
+          });
+
+          reader.readAsText(file); // CSVファイルをテキストとして読み込む
+          await filePromise;
+        }
+      })
+    );
+
+    setLandmarkDict(tempLandmarkDict);
+    // console.log("--- landmark dict ---");
+    // console.log(JSON.stringify(tempLandmarkDict, null, 2));
   };
 
   return (
@@ -118,11 +165,15 @@ export default function Home() {
       </form>
 
       {/* メイン画面 */}
-      <div className="relative flex h-[80vh] flex-row justify-between border-2  border-black">
+      <div className="relative flex h-[80vh] flex-row justify-between border-2 border-black">
         {/* 左側: 編集部 */}
         <div className="mx-auto w-max">
           <CheckBoxForm />
-          <LandmarkEdit imageDict={imageDict} currentDay={currentDay} />
+          <LandmarkEdit 
+            imageDict={imageDict} 
+            landmarkDict={landmarkDict}
+            currentDay={currentDay} 
+          />
         </div>
 
         {/* 右側 */}
@@ -136,11 +187,14 @@ export default function Home() {
           {/* アコーディオン */}
           <div className="relative h-full w-full">
             {Object.keys(directoryStructure).length > 0 ? (
-              <DirectoryAccordion directoryStructure={directoryStructure} currentDay={currentDay} setCurrentDay={setCurrentDay} />
+              <DirectoryAccordion
+                directoryStructure={directoryStructure}
+                currentDay={currentDay}
+                setCurrentDay={setCurrentDay}
+              />
             ) : (
               <div>フォルダがありません</div>
             )}
-
             <div className="absolute bottom-0 flex w-full items-center justify-between p-4">
               <div className="">あ</div>
               <Button className="bg-blue-500">保存</Button>
