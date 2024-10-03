@@ -1,6 +1,10 @@
 {
   "extends": [
-    "next/core-web-vitals"
-    // ,"next/typescript"
-]
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "plugins": ["tailwindcss"],
+  "rules": {
+    "tailwindcss/classnames-order": "warn" // クラス名の順序を整える
+  }
 }

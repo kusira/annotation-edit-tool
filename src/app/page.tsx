@@ -2,10 +2,10 @@
 import { DirectoryStructure } from "@/types/directoryStructure";
 import { useFileStore } from "./zustand/useFileStore";
 import { useState } from "react";
-import Accordion from "./components/accordion";
 import { LandmarkEdit } from "./components/landmarkEdit";
 import { Button } from "@/components/ui/button";
 import CheckBoxForm from "./components/checkBoxForm";
+import DirectoryAccordion from "./components/directoryAccordion";
 
 export default function Home() {
   // Zustandのフックを呼び出す
@@ -103,7 +103,7 @@ export default function Home() {
   };
 
   return (
-    <div className="w-[80vw] max-width-[1000px] mx-auto mt-[2vh]">
+    <div className="max-width-[1000px] mx-auto mt-[2vh] w-[80vw]">
       {/* ディレクトリ選択フォーム */}
       <form className="flex flex-col ">
         <input
@@ -118,15 +118,15 @@ export default function Home() {
       </form>
 
       {/* メイン画面 */}
-      <div className="relative border-2 border-black h-[80vh] flex flex-row  justify-between">
+      <div className="relative flex h-[80vh] flex-row justify-between border-2  border-black">
         {/* 左側: 編集部 */}
-        <div className="w-max mx-auto">
+        <div className="mx-auto w-max">
           <CheckBoxForm />
           <LandmarkEdit imageDict={imageDict} currentDay={currentDay} />
         </div>
 
         {/* 右側 */}
-        <div className="border-black border-l-2 min-w-[300px] h-full right-0 bottom-0 bg-white flex flex-col">
+        <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col border-l-2 border-black bg-white">
           {/* 可視画像 */}
           <img
             src={imageDict[`${currentDay}_visible_image.png`]}
@@ -134,14 +134,14 @@ export default function Home() {
             height={480 * 1 / 2}
           />
           {/* アコーディオン */}
-          <div className="relative w-full h-full">
+          <div className="relative h-full w-full">
             {Object.keys(directoryStructure).length > 0 ? (
-              <Accordion directoryStructure={directoryStructure} currentDay={currentDay} setCurrentDay={setCurrentDay} />
+              <DirectoryAccordion directoryStructure={directoryStructure} currentDay={currentDay} setCurrentDay={setCurrentDay} />
             ) : (
               <div>フォルダがありません</div>
             )}
 
-            <div className="absolute bottom-0 w-full p-4 flex justify-between items-center">
+            <div className="absolute bottom-0 flex w-full items-center justify-between p-4">
               <div className="">あ</div>
               <Button className="bg-blue-500">保存</Button>
             </div>

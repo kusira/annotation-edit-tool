@@ -11,7 +11,7 @@ type FileStateType = {
 
 const useFileStore = create<FileStateType>()(
   persist(
-    immer((set, get) => ({
+    immer((set) => ({
       directoryStructure: {} as DirectoryStructure,
       setDirectoryStructure: (structure: DirectoryStructure) =>
         set({ directoryStructure: structure }),

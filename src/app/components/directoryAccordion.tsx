@@ -1,15 +1,15 @@
 import { DirectoryStructure } from "@/types/directoryStructure";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import { useFileStore } from "../zustand/useFileStore";
 
-const Accordion = ({
+const DirectoryAccordion = ({
   directoryStructure,
   currentDay,
   setCurrentDay,
 }: { 
   directoryStructure: DirectoryStructure,
   currentDay: string,
-  setCurrentDay: any,
+  setCurrentDay: Dispatch<React.SetStateAction<string>>;
 }) => {
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const { toggleEdited } = useFileStore(); // ZustandからtoggleEditedを取得
@@ -52,7 +52,7 @@ const Accordion = ({
                         onChange={() => toggleEdited(date, time)} // チェックボックスの状態を変更
                       />
                       <div onClick={() => setCurrentDay(time)}
-                        className={`ml-1 cursor-pointer w-full`}
+                        className={`ml-1 w-full cursor-pointer`}
                       >
                         {time}
                       </div>
@@ -68,4 +68,4 @@ const Accordion = ({
   );
 };
 
-export default Accordion;
+export default DirectoryAccordion;

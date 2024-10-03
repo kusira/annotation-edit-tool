@@ -97,7 +97,7 @@ const CheckBoxForm = () => {
           checked={selected.face}
           onChange={handleChange}
         />
-        <label htmlFor="face" className="pl-2 cursor-pointer">0: Face</label>
+        <label htmlFor="face" className="cursor-pointer pl-2">0: Face</label>
       </div>
       <div>
         <input
@@ -108,7 +108,7 @@ const CheckBoxForm = () => {
           onChange={handleChange}
           disabled={selected.face} // faceがONの時は無効化
         />
-        <label htmlFor="glasses" className="pl-2 cursor-pointer">1: Glasses</label>
+        <label htmlFor="glasses" className="cursor-pointer pl-2">1: Glasses</label>
       </div>
       <div>
         <input
@@ -119,7 +119,7 @@ const CheckBoxForm = () => {
           onChange={handleChange}
           disabled={selected.face} // faceがONの時は無効化
         />
-        <label htmlFor="bread" className="pl-2 cursor-pointer">2: Bread</label>
+        <label htmlFor="bread" className="cursor-pointer pl-2">2: Bread</label>
       </div>
       <div>
         <input
@@ -130,7 +130,7 @@ const CheckBoxForm = () => {
           onChange={handleChange}
           disabled={selected.face || selected.chinmask} // faceがONの時、またはchinmaskがONの時は無効化
         />
-        <label htmlFor="fullmask" className="pl-2 cursor-pointer">3: Full Mask</label>
+        <label htmlFor="fullmask" className="cursor-pointer pl-2">3: Full Mask</label>
       </div>
       <div>
         <input
@@ -141,7 +141,7 @@ const CheckBoxForm = () => {
           onChange={handleChange}
           disabled={selected.face || selected.fullmask} // faceがONの時、またはfullmaskがONの時は無効化
         />
-        <label htmlFor="chinmask" className="pl-2 cursor-pointer">4: Chin Mask</label>
+        <label htmlFor="chinmask" className="cursor-pointer pl-2">4: Chin Mask</label>
       </div>
     </div>
   );

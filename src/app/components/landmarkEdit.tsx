@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import CheckBoxForm from "./checkBoxForm";
 
 export const LandmarkEdit = ({
   imageDict,
@@ -63,7 +62,7 @@ export const LandmarkEdit = ({
       </div>
       
       {/* 画像 */}
-      <div className="w-[640px] h-[512px] bg-white relative">
+      <div className="relative h-[512px] w-[640px] bg-white">
         <img
           src={imageDict[`${currentDay}_thermo_image.png`]}
           width={320 * 2}
