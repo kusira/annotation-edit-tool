@@ -1,10 +1,24 @@
 import { DirectoryStructure } from "@/types/directoryStructure";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFileStore } from "../zustand/useFileStore";
 
-const Accordion = ({ directoryStructure }: { directoryStructure: DirectoryStructure }) => {
+const Accordion = ({
+  directoryStructure,
+  currentDay,
+  setCurrentDay,
+}: { 
+  directoryStructure: DirectoryStructure,
+  currentDay: string,
+  setCurrentDay: any,
+}) => {
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const { toggleEdited } = useFileStore(); // ZustandからtoggleEditedを取得
+
+  // ディレクトリ構造のキー数に基づいて初期化
+  useEffect(() => {
+    const initialIndexes = Object.keys(directoryStructure).map((_, index) => index);
+    setOpenIndexes(initialIndexes);
+  }, [directoryStructure]);
 
   const toggleAccordion = (index: number) => {
     if (openIndexes.includes(index)) {
@@ -15,7 +29,7 @@ const Accordion = ({ directoryStructure }: { directoryStructure: DirectoryStruct
   };
 
   return (
-    <div className="w-[200px]">
+    <div className="w-full">
       {Object.keys(directoryStructure).map((date, index) => (
         <div key={date}>
           <div
@@ -25,19 +39,23 @@ const Accordion = ({ directoryStructure }: { directoryStructure: DirectoryStruct
             {date}
           </div>
           {openIndexes.includes(index) && (
-            <div className="pl-4">
+            <div>
               <ul>
                 {Object.keys(directoryStructure[date]).map((time) => {
                   const item = directoryStructure[date][time];
                   // dataオブジェクトのcsv_dataが存在する場合のみリストに表示
                   return item.csv_data ? (
-                    <li key={time} className="flex items-center p-1">
+                    <li key={time} className={`flex items-center p-1 pl-4 ${time === currentDay && "bg-red-200 font-bold"}`}>
                       <input
                         type="checkbox"
                         checked={item.isEdited} // チェックボックスの状態を更新
                         onChange={() => toggleEdited(date, time)} // チェックボックスの状態を変更
                       />
-                      <span className="ml-1">{time.slice(0, -4)}</span>
+                      <div onClick={() => setCurrentDay(time)}
+                        className={`ml-1 cursor-pointer w-full`}
+                      >
+                        {time}
+                      </div>
                     </li>
                   ) : null;
                 })}
