@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CanvasLandmarks from "./canvasLandmark";
 
 export const LandmarkEdit = ({
   imageDict,
@@ -13,7 +14,7 @@ export const LandmarkEdit = ({
   const [contrast, setContrast] = useState<number>(100);
   const [brightness, setBrightness] = useState<number>(100);
   // 画像の倍率
-  const magnification = 2.0;
+  const magnification = 2.5;
 
   // currentDayが変更されたときにコントラストと明るさをリセット
   useEffect(() => {
@@ -83,21 +84,15 @@ export const LandmarkEdit = ({
           style={{ filter: `contrast(${contrast}%) brightness(${brightness}%)` }}
         />
 
-        {/* 特徴点の描画 */}
         {landmarkDict[`${currentDay}.csv`] &&
-          landmarkDict[`${currentDay}.csv`].map((landmark, index) => (
-            <div
-              key={index}
-              className="absolute bg-red-500 rounded-full"
-              style={{
-                width: "2px",
-                height: "5px",
-                left: `${landmark[0] * magnification}px`, // x座標に倍率を掛ける
-                top: `${landmark[1] * magnification}px`,  // y座標に倍率を掛ける
-                transform: "translate(-50%, -50%)", // 中心を基準に位置を調整
-              }}
-            />
-          ))}
+          <CanvasLandmarks
+            imageWidth={320 * magnification}
+            imageHeight={256 * magnification}
+            points={landmarkDict[`${currentDay}.csv`]}
+            magnification={magnification}
+          />
+        }
+
       </div>
     </div>
   );
