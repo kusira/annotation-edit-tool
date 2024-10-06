@@ -7,31 +7,42 @@ export const handleKeyDown = (
   setSelectedPoint: React.Dispatch<React.SetStateAction<number | null>>
 ) => {
   // すでに選択されていないか、選択ポイントが無効な場合は処理をスキップ
-  if (selectedPoint === null) return;
+  if (selectedPoint === null) {
+    switch (event.key) {
+      case "z":
+        setSelectedPoint(0);
+        return;
+      case "x":
+        setSelectedPoint(67);
+        return;
+      default:
+        return; // 無視
+    }
+  }
 
   const updatedPoints = [...points];
   const movement = magnification;
 
   switch (event.key) {
-    case "ArrowUp":
+    case "w":
       updatedPoints[selectedPoint][1] -= movement;
       break;
-    case "ArrowDown":
+    case "s":
       updatedPoints[selectedPoint][1] += movement;
       break;
-    case "ArrowLeft":
+    case "a":
       updatedPoints[selectedPoint][0] -= movement;
       break;
-    case "ArrowRight":
+    case "d":
       updatedPoints[selectedPoint][0] += movement;
       break;
-    case "/":
+    case "z":
       // 選択している点を+1
-      setSelectedPoint((prev: number | null) => (prev === null ? null : (prev - 1 + 68) % 68)); // 循環させる
+      setSelectedPoint((prev: number | null) => (prev === null ? 0 : (prev - 1 + 68) % 68)); // 循環させる
       return;
-    case "\\":
+    case "x":
       // 選択している点を-1
-      setSelectedPoint((prev: number | null) => (prev === null ? null : (prev + 1) % 68)); // 循環させる
+      setSelectedPoint((prev: number | null) => (prev === null ? 67 : (prev + 1) % 68)); // 循環させる
       return;
     default:
       return; // 無視

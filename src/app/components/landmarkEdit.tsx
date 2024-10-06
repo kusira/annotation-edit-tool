@@ -123,15 +123,6 @@ export const LandmarkEdit = ({
             />
             Key
           </label>
-          <label className="cursor-pointer">
-            <input
-              type="radio"
-              value="brush"
-              checked={mode === "brush"}
-              onChange={handleModeChange}
-            />
-            Brush
-          </label>
         </div>
       </div>
     </div>
