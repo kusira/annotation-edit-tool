@@ -1,12 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { drawPoints, drawConnections } from '../utils/drawLandmark';
+import { handleKeyDown, handleMouseDownKeyMode } from '../utils/keyMode';
+import { handleMouseDownMoveMode, handleMouseMoveMoveMode, handleMouseUpMoveMode } from '../utils/moveMode';
 
 interface CanvasLandmarksProps {
   imageWidth: number;
   imageHeight: number;
   points: number[][]; // 2次元配列としてポイントを受け取る
   magnification: number; // 拡大倍率
-  currentDay: string;
-  mode: string; // 追加: モードを受け取る
+  currentDay: string; // 現在の日付
+  mode: string; // 操作モード
 }
 
 const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
@@ -18,41 +21,35 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   mode,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [draggingPoint, setDraggingPoint] = useState<number | null>(null); // ドラッグ中のポイントのインデックス
-  const [currentPoints, setCurrentPoints] = useState(points); // 現在のポイント座標
+  const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
+  const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
+  const [currentPoints, setCurrentPoints] = useState(points);
 
+  // points が変わったときに currentPoints を更新
   useEffect(() => {
     setCurrentPoints(points);
-  }, [currentDay]);
+    setSelectedPoint(null);
+  }, [points]);
 
-  const drawPoints = (ctx: CanvasRenderingContext2D) => {
-    ctx.fillStyle = "red"; // ポイントの色
-    currentPoints.forEach((point, index) => {
-      const [x, y] = point.map(coord => coord * magnification); // 拡大倍率を適用
-      ctx.beginPath();
-      ctx.arc(x, y, 2, 0, 2 * Math.PI); // ポイントを描画
-      ctx.fill();
-    });
-  };
+  // モードが変わったときに選択をリセット
+  useEffect(() => {
+    setSelectedPoint(null); // モード変更時に選択状態をリセット
+  }, [mode]);
 
-  const drawConnections = (ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "blue"; // 線の色
-    ctx.lineWidth = 1;
-
-    const skipIndices = new Set([17, 22, 27, 36, 42, 48]); // 接続をスキップするインデックス
-
-    for (let i = 0; i < currentPoints.length - 1; i++) {
-      if (skipIndices.has(i + 1)) continue;
-
-      const [x1, y1] = currentPoints[i].map(coord => coord * magnification);
-      const [x2, y2] = currentPoints[i + 1].map(coord => coord * magnification);
-
-      ctx.beginPath();
-      ctx.moveTo(x1, y1);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
+  // キーイベントの設定
+  useEffect(() => {
+    const handleKeyDownEvent = (event: KeyboardEvent) => {
+      handleKeyDown(event, selectedPoint, currentPoints, setCurrentPoints, magnification, setSelectedPoint);
     }
-  };
+
+    // キーを押したときのイベントリスナー
+    window.addEventListener("keydown", handleKeyDownEvent);
+    
+    // コンポーネントがアンマウントされたときにリスナーを削除
+    return () => {
+      window.removeEventListener("keydown", handleKeyDownEvent);
+    };
+  }, [selectedPoint, currentPoints, magnification]); // 依存関係にすべての状態を含める
 
   // キャンバスの描画
   useEffect(() => {
@@ -60,54 +57,27 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
     if (canvas) {
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // キャンバスをクリア
-        drawPoints(ctx); // ポイントを描画
-        drawConnections(ctx); // 線を描画
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawPoints(ctx, currentPoints, magnification, selectedPoint);
+        drawConnections(ctx, currentPoints, magnification);
       }
     }
-  }, [currentPoints, magnification]);
+  }, [currentPoints, magnification, selectedPoint]); // キャンバスの描画も依存関係を明示する
 
-  // ドラッグ開始
-  const handleMouseDown = (event: React.MouseEvent) => {
-    if (mode !== "move") return; // モードが"move"以外なら動作させない
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = (event.clientX - rect.left) / magnification;
-    const mouseY = (event.clientY - rect.top) / magnification;
-
-    currentPoints.forEach(([x, y], index) => {
-      const distance = Math.sqrt((x - mouseX) ** 2 + (y - mouseY) ** 2);
-      if (distance < 2) {
-        setDraggingPoint(index); // ドラッグ対象のポイントを設定
-      }
-    });
+  // ポインターダウンイベント
+  const handlePointerDown = (event: React.MouseEvent) => {
+    if (mode === 'move') {
+      handleMouseDownMoveMode(event, canvasRef, currentPoints, setDraggingPoint, magnification);
+    } else if (mode === 'key') {
+      handleMouseDownKeyMode(event, canvasRef, currentPoints, setSelectedPoint, selectedPoint, magnification);
+    }
   };
 
-  // ドラッグ中
-  const handleMouseMove = (event: React.MouseEvent) => {
-    if (mode !== "move" || draggingPoint === null) return; // モードが"move"以外か、ドラッグしていない場合は何もしない
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const mouseX = (event.clientX - rect.left) / magnification;
-    const mouseY = (event.clientY - rect.top) / magnification;
-
-    const updatedPoints = currentPoints.map((point, index) => 
-      index === draggingPoint ? [mouseX, mouseY] : point
-    );
-
-    setCurrentPoints(updatedPoints); // 座標を更新
-  };
-
-  // ドラッグ終了
-  const handleMouseUp = () => {
-    // if (mode !== "move") return; // モードが"move"以外なら動作させない
-    setDraggingPoint(null); // ドラッグを終了
+  // ポインタームーブイベント
+  const handlePointerMove = (event: React.MouseEvent) => {
+    if (mode === 'move') {
+      handleMouseMoveMoveMode(event, draggingPoint, canvasRef, currentPoints, setCurrentPoints, magnification);
+    }
   };
 
   return (
@@ -117,9 +87,9 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
         width={imageWidth * magnification}
         height={imageHeight * magnification}
         style={{ position: 'absolute', top: 0, left: 0 }}
-        onPointerDown={handleMouseDown}
-        onPointerMove={handleMouseMove}
-        onPointerUp={handleMouseUp}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={() => handleMouseUpMoveMode(setDraggingPoint)}
       />
     </div>
   );

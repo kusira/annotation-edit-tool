@@ -183,7 +183,7 @@ export default function Home() {
 
       {/* メイン画面 */}
       <div className="relative flex h-[80vh] flex-row justify-between border-2 border-black">
-        {/* 左側: 編集部 */}
+        {/* 左側: サイドバー */}
         <div className="mx-auto w-max">
           <CheckBoxForm />
           <LandmarkEdit
@@ -193,7 +193,7 @@ export default function Home() {
           />
         </div>
 
-        {/* 右側 */}
+        {/* 右側: メインビュー */}
         <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col border-l-2 border-black bg-white">
           {/* 可視画像 */}
           <img

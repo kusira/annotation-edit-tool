@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import CanvasLandmarks from "./canvasLandmark";
-import { Button } from "@/components/ui/button";
 
 export const LandmarkEdit = ({
   imageDict,
@@ -18,7 +17,7 @@ export const LandmarkEdit = ({
   const [contrast, setContrast] = useState<number>(100);
   const [brightness, setBrightness] = useState<number>(100);
   // 画像の倍率
-  const magnification = 2.5;
+  const magnification = 2;
 
   // currentDayが変更されたときにコントラストと明るさをリセット
   useEffect(() => {
@@ -114,6 +113,15 @@ export const LandmarkEdit = ({
               onChange={handleModeChange}
             />
             Move
+          </label>
+          <label className="cursor-pointer">
+            <input
+              type="radio"
+              value="key"
+              checked={mode === "key"}
+              onChange={handleModeChange}
+            />
+            Key
           </label>
           <label className="cursor-pointer">
             <input
