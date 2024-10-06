@@ -180,7 +180,10 @@ export default function Home() {
   };
 
   return (
-    <div className="nx-auto mx-auto mt-[2vh] w-[90vw] ">
+    <div 
+      onContextMenu={(e) => e.preventDefault()} // 右クリック無効化
+      className="nx-auto mx-auto mt-[2vh] w-[90vw]"
+    >
       {/* ディレクトリ選択フォーム */}
       <form className="flex flex-col ">
         <input
