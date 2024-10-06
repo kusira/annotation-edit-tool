@@ -1,7 +1,7 @@
 "use client";
 import { DirectoryStructure } from "@/types/directoryStructure";
 import { useFileStore } from "./zustand/useFileStore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LandmarkEdit } from "./components/landmarkEdit";
 import { Button } from "@/components/ui/button";
 import CheckBoxForm from "./components/checkBoxForm";
@@ -26,6 +26,10 @@ export default function Home() {
 
   // trueである項目を配列で保存する状態
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+
+  useEffect(() => {
+    setSelectedItems([]);
+  },[currentTime])
 
   // 入力されたファイルからディレクトリ構造を作成
   function buildDirectoryStructure(paths: string[]): DirectoryStructure {
@@ -201,7 +205,10 @@ export default function Home() {
       <div className="relative flex h-[85vh] flex-row justify-between border-2 border-black">
         {/* 左側: サイドバー */}
         <div className="mx-auto w-max">
-          <CheckBoxForm setSelectedItems={setSelectedItems}/>
+          <CheckBoxForm 
+            currentTime={currentTime}
+            setSelectedItems={setSelectedItems}
+          />
           <LandmarkEdit
             imageDict={imageDict}
             landmarkDict={landmarkDict}

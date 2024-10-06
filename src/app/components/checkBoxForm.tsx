@@ -9,7 +9,7 @@ interface SelectedState {
   other: boolean;
 }
 
-const CheckBoxForm = ({setSelectedItems} : {setSelectedItems: Dispatch<React.SetStateAction<string[]>>;}) => {
+const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, setSelectedItems: Dispatch<React.SetStateAction<string[]>>;}) => {
   // チェックボックスの状態を管理
   const [selected, setSelected] = useState<SelectedState>({
     face: false,
@@ -65,8 +65,8 @@ const CheckBoxForm = ({setSelectedItems} : {setSelectedItems: Dispatch<React.Set
     if (selected.face) items.push("face");
     if (selected.glasses) items.push("glasses");
     if (selected.bread) items.push("bread");
-    if (selected.fullmask) items.push("fullmask");
-    if (selected.chinmask) items.push("chinmask");
+    if (selected.fullmask) items.push("full_mask");
+    if (selected.chinmask) items.push("chin_mask");
     if (selected.other) items.push("other");
     setSelectedItems(items);
   };
@@ -75,6 +75,18 @@ const CheckBoxForm = ({setSelectedItems} : {setSelectedItems: Dispatch<React.Set
   useEffect(() => {
     updateSelectedItems();
   }, [selected]);
+
+  // currentTimeが変わったら全てのチェックボックスをOFFにする
+  useEffect(() => {
+    setSelected({
+      face: false,
+      glasses: false,
+      bread: false,
+      fullmask: false,
+      chinmask: false,
+      other: false,
+    });
+  }, [currentTime]);
 
   // キーボードイベントを監視するためのuseEffectフック
   useEffect(() => {
