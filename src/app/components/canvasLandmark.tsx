@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { drawPoints, drawConnections } from '../utils/drawLandmark';
-import { handleKeyDown, handleMouseDownKeyMode } from '../utils/keyMode';
-import { handleMouseDownMoveMode, handleMouseMoveMoveMode, handleMouseUpMoveMode } from '../utils/moveMode';
+import React, { useRef, useState, useEffect } from "react";
+import { drawPoints, drawConnections } from "../utils/drawLandmark";
+import { handleKeyDown, handleMouseDownKeyMode } from "../utils/keyMode";
+import { handleMouseDownMoveMode, handleMouseMoveMoveMode, handleMouseUpMoveMode } from "../utils/moveMode";
 
 interface CanvasLandmarksProps {
   imageWidth: number;
@@ -24,6 +24,7 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
   const [currentPoints, setCurrentPoints] = useState(points);
+  const radius = 12;
 
   // points が変わったときに currentPoints を更新
   useEffect(() => {
@@ -40,56 +41,65 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   useEffect(() => {
     const handleKeyDownEvent = (event: KeyboardEvent) => {
       handleKeyDown(event, selectedPoint, currentPoints, setCurrentPoints, magnification, setSelectedPoint);
-    }
+    };
 
-    // キーを押したときのイベントリスナー
     window.addEventListener("keydown", handleKeyDownEvent);
-    
-    // コンポーネントがアンマウントされたときにリスナーを削除
     return () => {
       window.removeEventListener("keydown", handleKeyDownEvent);
     };
-  }, [selectedPoint, currentPoints, magnification]); // 依存関係にすべての状態を含める
+  }, [selectedPoint, currentPoints, magnification]);
 
   // キャンバスの描画
   useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas) {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawPoints(ctx, currentPoints, magnification, selectedPoint);
         drawConnections(ctx, currentPoints, magnification);
+        
+        // モードが brush のときに赤い円を描く
+        if (mode === "brush") {
+          ctx.fillStyle = "red";
+          ctx.beginPath();
+          ctx.arc(0, 0, radius, 0, Math.PI * 2); // 初期位置の赤い円
+          ctx.fill();
+        }
       }
     }
-  }, [currentPoints, magnification, selectedPoint]); // キャンバスの描画も依存関係を明示する
+  }, [currentPoints, magnification, selectedPoint, mode]); // modeを依存関係に追加
 
   // ポインターダウンイベント
   const handlePointerDown = (event: React.MouseEvent) => {
-    if (mode === 'move') {
+    if (mode === "move") {
       handleMouseDownMoveMode(event, canvasRef, currentPoints, setDraggingPoint, magnification);
-    } else if (mode === 'key') {
+    } else if (mode === "key") {
       handleMouseDownKeyMode(event, canvasRef, currentPoints, setSelectedPoint, selectedPoint, magnification);
     }
   };
 
   // ポインタームーブイベント
   const handlePointerMove = (event: React.MouseEvent) => {
-    if (mode === 'move') {
+    if (mode === "move") {
       handleMouseMoveMoveMode(event, draggingPoint, canvasRef, currentPoints, setCurrentPoints, magnification);
     }
   };
 
   return (
-    <div style={{ position: 'relative', zIndex: 100 }}>
+    <div style={{ position: "relative", zIndex: 100 }}>
       <canvas
         ref={canvasRef}
         width={imageWidth * magnification}
         height={imageHeight * magnification}
-        style={{ position: 'absolute', top: 0, left: 0 }}
+        style={{ position: "absolute", top: 0, left: 0 }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
-        onPointerUp={() => handleMouseUpMoveMode(setDraggingPoint)}
+        onPointerUp={() => {
+          if (mode === "move") {
+            handleMouseUpMoveMode(setDraggingPoint);
+          }
+        }}
       />
     </div>
   );

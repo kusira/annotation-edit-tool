@@ -182,7 +182,7 @@ export default function Home() {
       </form>
 
       {/* メイン画面 */}
-      <div className="relative flex h-[80vh] flex-row justify-between border-2 border-black">
+      <div className="relative flex h-[80vh] flex-row justify-between">
         {/* 左側: サイドバー */}
         <div className="mx-auto w-max">
           <CheckBoxForm />
@@ -194,7 +194,7 @@ export default function Home() {
         </div>
 
         {/* 右側: メインビュー */}
-        <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col border-l-2 border-black bg-white">
+        <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col bg-white">
           {/* 可視画像 */}
           <img
             src={imageDict[`${currentDay}_visible_image.png`]}
@@ -212,7 +212,7 @@ export default function Home() {
             ) : (
               <div>フォルダがありません</div>
             )}
-            <div className="absolute bottom-0 flex w-full items-center justify-between p-4">
+            <div className="absolute bottom-0 flex w-full items-center justify-between p-2 bg-blue-50">
               <div className="">あ</div>
               <Button className="bg-blue-500">保存</Button>
             </div>
