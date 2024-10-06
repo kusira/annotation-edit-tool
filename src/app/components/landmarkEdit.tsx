@@ -108,7 +108,7 @@ export const LandmarkEdit = ({
         )}
 
         {/* モード切り替え用のラジオボタン */}
-        <div className="absolute bottom-2 right-2 flex flex-col gap-2 bg-white p-2 rounded-xl z-[100]">
+        <div className="absolute bottom-2 right-2 z-[100] flex flex-col gap-2 rounded-xl bg-white p-2">
           <label className="cursor-pointer">
             <input
               type="radio"

@@ -29,7 +29,7 @@ const DirectoryAccordion = ({
   };
 
   return (
-    <div className="w-full">
+    <div className="h-[48vh] w-full overflow-y-scroll bg-red-50">
       {Object.keys(directoryStructure).map((date, index) => (
         <div key={date}>
           <div
@@ -40,12 +40,12 @@ const DirectoryAccordion = ({
           </div>
           {openIndexes.includes(index) && (
             <div>
-              <ul>
+              <ul className="max-h-64 overflow-y-auto">
                 {Object.keys(directoryStructure[date]).map((time) => {
                   const item = directoryStructure[date][time];
                   // dataオブジェクトのcsv_dataが存在する場合のみリストに表示
                   return item.csv_data ? (
-                    <li key={time} className={`flex items-center p-1 pl-4 ${time === currentTime && "bg-red-200 font-bold"}`}>
+                    <li key={time} className={`flex items-center p-1 pl-4 ${time === currentTime && "bg-orange-200 font-bold"}`}>
                       <input
                         type="checkbox"
                         checked={item.isEdited} // チェックボックスの状態を更新

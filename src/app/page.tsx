@@ -15,7 +15,9 @@ export default function Home() {
 
   // ファイルの読み込み
   const [files, setFiles] = useState<File[]>();
-  // 現在見ている画像
+  // CSV辞書
+  const [csvDict, setCsvDict] = useState<{ [key: string]: string[] }>({});
+  // 現在見ている時間画像
   const [currentTime, setcurrentTime] = useState<string>("");
   // 画像辞書
   const [imageDict, setImageDict] = useState<{ [key: string]: string }>({});
@@ -133,6 +135,7 @@ export default function Home() {
   const handleLandmarkDictionary = async (filteredFiles: File[]) => {
     const tempLandmarkDict: { [key: string]: number[][] } = {};
 
+    const tmpCsvDict: { [key: string]: string[] } = {}
     await Promise.all(
       filteredFiles.map(async (file) => {
         if (file.name.endsWith(".csv")) { // CSVファイルをフィルタリング
@@ -141,6 +144,10 @@ export default function Home() {
             reader.onload = (event) => {
               const csvContent = event.target?.result as string;
               const lines = csvContent.split("\n");
+              const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
+              // キーにcsvデータを追加
+              tmpCsvDict[key] = lines
+
               lines.forEach((line) => {
                 // thermo_landmark以降の部分を抽出
                 const thermoLandmarkIndex = line.indexOf("thermo_landmark");
@@ -148,13 +155,15 @@ export default function Home() {
                   const dataString = line.substring(thermoLandmarkIndex).split('"')[1]; // 二重引用符の中の部分を取得
                   try {
                     const thermoLandmarkArray = JSON.parse(dataString); // JSONとして解析
-                    const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
                     tempLandmarkDict[key] = thermoLandmarkArray; // 辞書にURLを格納
                   } catch (error) {
                     console.error("JSONの解析エラー:", error);
                   }
                 }
               });
+              // csvを読み込む
+              console.log(tmpCsvDict); 
+              setCsvDict(tmpCsvDict);
               resolve();
             };
           });
@@ -171,7 +180,7 @@ export default function Home() {
   };
 
   return (
-    <div className="max-width-[1000px] mx-auto mt-[2vh] w-[80vw]">
+    <div className="nx-auto mx-auto mt-[2vh] w-[90vw] ">
       {/* ディレクトリ選択フォーム */}
       <form className="flex flex-col ">
         <input
@@ -186,7 +195,7 @@ export default function Home() {
       </form>
 
       {/* メイン画面 */}
-      <div className="relative flex h-[85vh] flex-row justify-between">
+      <div className="relative flex h-[85vh] flex-row justify-between border-2 border-black">
         {/* 左側: サイドバー */}
         <div className="mx-auto w-max">
           <CheckBoxForm setSelectedItems={setSelectedItems}/>
@@ -199,34 +208,38 @@ export default function Home() {
         </div>
 
         {/* 右側: メインビュー */}
-        <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col bg-white">
+        <div className="bottom-0 right-0 flex min-w-[300px] flex-col border-l-2 border-black bg-white">
           {/* 可視画像 */}
           <img
             src={imageDict[`${currentTime}_visible_image.png`]}
-            width={640 * 1 / 2}
-            height={480 * 1 / 2}
+            width={640}
+            height={480}
+            className="h-[30vh] w-[40vh]"
           />
-          {/* アコーディオン */}
-          <div className="relative h-full w-full">
-            {Object.keys(directoryStructure).length > 0 ? (
-              <DirectoryAccordion
-                directoryStructure={directoryStructure}
-                currentTime={currentTime}
-                setcurrentTime={setcurrentTime}
-              />
-            ) : (
-              <div>フォルダがありません</div>
-            )}
-            <div className="absolute bottom-0 flex w-full items-center justify-between p-2 bg-blue-50">
-              <div className="">あ</div>
-              <Button 
-                onClick={() => handleSave(landmarkDict, selectedItems, currentTime)}
-                disabled={selectedItems.length === 0 || files === undefined}
-                className="bg-blue-500 hover:bg-blue-700 transition-all"
-              >
-                保存
-              </Button>
-            </div>
+
+          <div className="h-[50vh]">
+            {/* アコーディオン */}
+            <div className="relative w-full">
+              {Object.keys(directoryStructure).length > 0 ? (
+                <DirectoryAccordion
+                  directoryStructure={directoryStructure}
+                  currentTime={currentTime}
+                  setcurrentTime={setcurrentTime}
+                />
+              ) : (
+                <div>フォルダがありません</div>
+              )}
+              {/* 保存 */}
+              <div className="flex h-[7vh] w-full translate-y-[-2px] items-center justify-between border-b-2 border-black bg-blue-50 p-2">
+                <Button
+                  onClick={() => handleSave(landmarkDict, selectedItems, currentTime, csvDict[`${currentTime}.csv`])}
+                  disabled={selectedItems.length === 0 || files === undefined}
+                  className="bg-blue-500 transition-all hover:bg-blue-700"
+                >
+                  保存
+                </Button>
+              </div>
+          </div>
           </div>
         </div>
       </div>

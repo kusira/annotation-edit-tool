@@ -2,7 +2,8 @@
 export const handleSave = (
   landmarkDict: { [key: string]: number[][] },
   selectedItems: string[],
-  currentTime: string // 現在の日時
+  currentTime: string, // 現在の日時
+  csvList: string[],
 ) => {
   // 現在のランドマークデータと選択されたアイテムを取得
   const thermo_landmark = landmarkDict[`${currentTime}.csv`] || {};
@@ -16,13 +17,18 @@ export const handleSave = (
     .replace(/"/g, "'") // ダブルクォーテーションをシングルクォーテーションに置換
     .replace(/,/g, ", "); // カンマの後にスペースを入れる
 
+  // 元のCSVリストをコピーし、thermo_landmark と state の値を更新
+  const updatedCsvList = csvList.map((line) => {
+    if (line.startsWith("thermo_landmark")) {
+      return `thermo_landmark,"${thermoLandmarkString}"`; // 新しいthermo_landmarkを代入
+    } else if (line.startsWith("state")) {
+      return `state,"${stateString}"`; // 新しいstateを代入
+    }
+    return line; // 他の行は変更せずそのまま返す
+  });
+
   // CSV形式のデータを作成
-  const csvContent = [
-    ["thermo_landmark", `"${thermoLandmarkString}"`], // thermo_landmark をダブルクォーテーションで囲む
-    ["state", `"${stateString}"`] // state をダブルクォーテーションで囲む
-  ]
-    .map(e => e.join(",")) // 各行をカンマで結合
-    .join("\n"); // 行を改行で結合
+  const csvContent = updatedCsvList.join("\n");
 
   // Blobオブジェクトを作成
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
