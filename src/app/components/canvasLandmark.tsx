@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, Dispatch } from "react";
 import { drawPoints, drawConnections } from "../utils/drawLandmark";
 import { handleKeyDown, handleMouseDownKeyMode } from "../utils/keyMode";
 import { handleMouseDownMoveMode, handleMouseMoveMoveMode, handleMouseUpMoveMode } from "../utils/moveMode";
@@ -6,25 +6,28 @@ import { handleMouseDownMoveMode, handleMouseMoveMoveMode, handleMouseUpMoveMode
 interface CanvasLandmarksProps {
   imageWidth: number;
   imageHeight: number;
+  currentTime: string; // 現在の日付
+  landmarkDict: { [key: string]: number[][] };
+  setLandmarkDict: Dispatch<React.SetStateAction<{ [key: string]: number[][] }>>;
   points: number[][]; // 2次元配列としてポイントを受け取る
   magnification: number; // 拡大倍率
-  currentDay: string; // 現在の日付
   mode: string; // 操作モード
 }
 
 const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   imageWidth,
   imageHeight,
+  currentTime,
+  landmarkDict,
+  setLandmarkDict,
   points,
   magnification,
-  currentDay,
   mode,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [selectedPoint, setSelectedPoint] = useState<number | null>(null);
   const [currentPoints, setCurrentPoints] = useState(points);
-  const radius = 12;
 
   // points が変わったときに currentPoints を更新
   useEffect(() => {
@@ -40,6 +43,7 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   // キーイベントの設定
   useEffect(() => {
     const handleKeyDownEvent = (event: KeyboardEvent) => {
+      // key モードにおける座標の更新
       handleKeyDown(event, selectedPoint, currentPoints, setCurrentPoints, magnification, setSelectedPoint);
     };
 
@@ -58,14 +62,6 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawPoints(ctx, currentPoints, magnification, selectedPoint);
         drawConnections(ctx, currentPoints, magnification);
-        
-        // モードが brush のときに赤い円を描く
-        if (mode === "brush") {
-          ctx.fillStyle = "red";
-          ctx.beginPath();
-          ctx.arc(0, 0, radius, 0, Math.PI * 2); // 初期位置の赤い円
-          ctx.fill();
-        }
       }
     }
   }, [currentPoints, magnification, selectedPoint, mode]); // modeを依存関係に追加
@@ -73,7 +69,13 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   // ポインターダウンイベント
   const handlePointerDown = (event: React.MouseEvent) => {
     if (mode === "move") {
-      handleMouseDownMoveMode(event, canvasRef, currentPoints, setDraggingPoint, magnification);
+      handleMouseDownMoveMode(
+        event,
+        canvasRef, 
+        currentPoints, 
+        setDraggingPoint, 
+        magnification,
+      );
     } else if (mode === "key") {
       handleMouseDownKeyMode(event, canvasRef, currentPoints, setSelectedPoint, selectedPoint, magnification);
     }
@@ -82,7 +84,18 @@ const CanvasLandmarks: React.FC<CanvasLandmarksProps> = ({
   // ポインタームーブイベント
   const handlePointerMove = (event: React.MouseEvent) => {
     if (mode === "move") {
-      handleMouseMoveMoveMode(event, draggingPoint, canvasRef, currentPoints, setCurrentPoints, magnification);
+      // moveモードにおける座標の更新
+      handleMouseMoveMoveMode(
+        event,
+        draggingPoint, 
+        canvasRef, 
+        currentPoints, 
+        setCurrentPoints, 
+        magnification,
+        currentTime,
+        landmarkDict,
+        setLandmarkDict,
+      );
     }
   };
 

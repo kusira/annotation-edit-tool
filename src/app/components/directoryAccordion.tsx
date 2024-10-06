@@ -4,12 +4,12 @@ import { useFileStore } from "../zustand/useFileStore";
 
 const DirectoryAccordion = ({
   directoryStructure,
-  currentDay,
-  setCurrentDay,
+  currentTime,
+  setcurrentTime,
 }: { 
   directoryStructure: DirectoryStructure,
-  currentDay: string,
-  setCurrentDay: Dispatch<React.SetStateAction<string>>;
+  currentTime: string,
+  setcurrentTime: Dispatch<React.SetStateAction<string>>;
 }) => {
   const [openIndexes, setOpenIndexes] = useState<number[]>([]);
   const { toggleEdited } = useFileStore(); // ZustandからtoggleEditedを取得
@@ -45,13 +45,13 @@ const DirectoryAccordion = ({
                   const item = directoryStructure[date][time];
                   // dataオブジェクトのcsv_dataが存在する場合のみリストに表示
                   return item.csv_data ? (
-                    <li key={time} className={`flex items-center p-1 pl-4 ${time === currentDay && "bg-red-200 font-bold"}`}>
+                    <li key={time} className={`flex items-center p-1 pl-4 ${time === currentTime && "bg-red-200 font-bold"}`}>
                       <input
                         type="checkbox"
                         checked={item.isEdited} // チェックボックスの状態を更新
                         onChange={() => toggleEdited(date, time)} // チェックボックスの状態を変更
                       />
-                      <div onClick={() => setCurrentDay(time)}
+                      <div onClick={() => setcurrentTime(time)}
                         className={`ml-1 w-full cursor-pointer`}
                       >
                         {time}

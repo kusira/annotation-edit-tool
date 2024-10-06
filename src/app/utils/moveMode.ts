@@ -1,9 +1,11 @@
+import { Dispatch } from "react";
+
 export const handleMouseDownMoveMode = (
   event: React.MouseEvent,
   canvasRef: React.RefObject<HTMLCanvasElement>,
   points: number[][],
   setDraggingPoint: React.Dispatch<React.SetStateAction<number | null>>,
-  magnification: number
+  magnification: number,
 ) => {
   if (!canvasRef.current) return;
 
@@ -25,7 +27,10 @@ export const handleMouseMoveMoveMode = (
   canvasRef: React.RefObject<HTMLCanvasElement>,
   points: number[][],
   setPoints: React.Dispatch<React.SetStateAction<number[][]>>,
-  magnification: number
+  magnification: number,
+  currentTime: string, // 現在の日付
+  landmarkDict: { [key: string]: number[][] },
+  setLandmarkDict: Dispatch<React.SetStateAction<{ [key: string]: number[][] }>>
 ) => {
   if (draggingPoint === null) return;
   if (!canvasRef.current) return;
@@ -44,9 +49,10 @@ export const handleMouseMoveMoveMode = (
       const deltaX = mouseX - currentX;
       const deltaY = mouseY - currentY;
 
+      const movement = 1;
       // 最小単位で移動
-      const movementX = Math.round(deltaX / magnification) * magnification;
-      const movementY = Math.round(deltaY / magnification) * magnification;
+      const movementX = Math.round(deltaX / magnification) * movement;
+      const movementY = Math.round(deltaY / magnification) * movement;
 
       return [currentX + movementX, currentY + movementY];
     }
@@ -54,6 +60,9 @@ export const handleMouseMoveMoveMode = (
   });
 
   setPoints(updatedPoints);
+  const tmpLandmarkDict = landmarkDict;
+  tmpLandmarkDict[`${currentTime}.csv`] = updatedPoints;
+  setLandmarkDict(tmpLandmarkDict)
 };
 
 export const handleMouseUpMoveMode = (

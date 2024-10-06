@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dispatch } from "react";
 import CanvasLandmarks from "./canvasLandmark";
 
 export const LandmarkEdit = ({
   imageDict,
   landmarkDict,
-  currentDay,
+  setLandmarkDict,
+  currentTime,
 }: {
   imageDict: { [key: string]: string };
   landmarkDict: { [key: string]: number[][] };
-  currentDay: string;
+  setLandmarkDict: Dispatch<React.SetStateAction<{ [key: string]: number[][] }>>;
+  currentTime: string;
 }) => {
   // モード
   const [mode, setMode] = useState<string>("move");
@@ -17,13 +19,13 @@ export const LandmarkEdit = ({
   const [contrast, setContrast] = useState<number>(100);
   const [brightness, setBrightness] = useState<number>(100);
   // 画像の倍率
-  const magnification = 2;
+  const magnification = 2
 
-  // currentDayが変更されたときにコントラストと明るさをリセット
+  // currentTimeが変更されたときにコントラストと明るさをリセット
   useEffect(() => {
     setContrast(100);
     setBrightness(100);
-  }, [currentDay]);
+  }, [currentTime]);
 
   // コントラストの変更時に呼ばれる関数
   const handleContrastChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,20 +87,22 @@ export const LandmarkEdit = ({
       >
         {/* 背景画像 */}
         <img
-          src={imageDict[`${currentDay}_thermo_image.png`]}
+          src={imageDict[`${currentTime}_thermo_image.png`]}
           width={320 * magnification}
           height={256 * magnification}
           className="absolute"
           style={{ filter: `contrast(${contrast}%) brightness(${brightness}%)` }}
         />
 
-        {landmarkDict[`${currentDay}.csv`] && (
+        {landmarkDict[`${currentTime}.csv`] && (
           <CanvasLandmarks
             imageWidth={320}
             imageHeight={256}
-            points={landmarkDict[`${currentDay}.csv`]}
+            currentTime={currentTime}
+            landmarkDict={landmarkDict}
+            setLandmarkDict={setLandmarkDict}
+            points={landmarkDict[`${currentTime}.csv`]}
             magnification={magnification}
-            currentDay={currentDay}
             mode={mode}
           />
         )}

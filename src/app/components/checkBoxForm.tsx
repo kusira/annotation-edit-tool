@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, useEffect, useState } from "react";
 
 interface SelectedState {
   face: boolean;
@@ -9,7 +9,7 @@ interface SelectedState {
   other: boolean;
 }
 
-const CheckBoxForm: React.FC = () => {
+const CheckBoxForm = ({setSelectedItems} : {setSelectedItems: Dispatch<React.SetStateAction<string[]>>;}) => {
   // チェックボックスの状態を管理
   const [selected, setSelected] = useState<SelectedState>({
     face: false,
@@ -58,6 +58,23 @@ const CheckBoxForm: React.FC = () => {
       });
     }
   };
+
+  // trueである項目を選別して配列を更新する関数
+  const updateSelectedItems = () => {
+    const items = [];
+    if (selected.face) items.push("face");
+    if (selected.glasses) items.push("glasses");
+    if (selected.bread) items.push("bread");
+    if (selected.fullmask) items.push("fullmask");
+    if (selected.chinmask) items.push("chinmask");
+    if (selected.other) items.push("other");
+    setSelectedItems(items);
+  };
+
+  // 状態変更時に選択項目を更新
+  useEffect(() => {
+    updateSelectedItems();
+  }, [selected]);
 
   // キーボードイベントを監視するためのuseEffectフック
   useEffect(() => {

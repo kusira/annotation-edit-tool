@@ -21,7 +21,7 @@ export const handleKeyDown = (
   }
 
   const updatedPoints = [...points];
-  const movement = magnification;
+  const movement = 1;
 
   switch (event.key) {
     case "w":

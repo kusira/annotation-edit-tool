@@ -6,6 +6,7 @@ import { LandmarkEdit } from "./components/landmarkEdit";
 import { Button } from "@/components/ui/button";
 import CheckBoxForm from "./components/checkBoxForm";
 import DirectoryAccordion from "./components/directoryAccordion";
+import { handleSave } from "./utils/saveCSV";
 
 export default function Home() {
   // Zustandのフックを呼び出す
@@ -15,11 +16,14 @@ export default function Home() {
   // ファイルの読み込み
   const [files, setFiles] = useState<File[]>();
   // 現在見ている画像
-  const [currentDay, setCurrentDay] = useState<string>("");
+  const [currentTime, setcurrentTime] = useState<string>("");
   // 画像辞書
   const [imageDict, setImageDict] = useState<{ [key: string]: string }>({});
   // 特徴点辞書
   const [landmarkDict, setLandmarkDict] = useState<{ [key: string]: number[][] }>({});
+
+  // trueである項目を配列で保存する状態
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   // 入力されたファイルからディレクトリ構造を作成
   function buildDirectoryStructure(paths: string[]): DirectoryStructure {
@@ -79,7 +83,7 @@ export default function Home() {
       // すべてのキー（日付）を取得
       const dates = Object.keys(directoryStructure);
 
-      // 一番古い日時を取得してcurrentDayを設定
+      // 一番古い日時を取得してcurrentTimeを設定
       if (dates.length > 0) {
         const oldestDate = dates.reduce((a, b) => (a < b ? a : b)); // 一番古い日付を取得
         const filenames = Object.keys(directoryStructure[oldestDate]);
@@ -87,7 +91,7 @@ export default function Home() {
         if (filenames.length > 0) {
           // 一番古いファイル名を持つキーを見つける
           const oldestFile = filenames.reduce((a, b) => (a < b ? a : b));
-          setCurrentDay(oldestFile); // currentDayを最初の日時に設定
+          setcurrentTime(oldestFile); // currentTimeを最初の日時に設定
         }
       }
     }
@@ -182,14 +186,15 @@ export default function Home() {
       </form>
 
       {/* メイン画面 */}
-      <div className="relative flex h-[80vh] flex-row justify-between">
+      <div className="relative flex h-[85vh] flex-row justify-between">
         {/* 左側: サイドバー */}
         <div className="mx-auto w-max">
-          <CheckBoxForm />
+          <CheckBoxForm setSelectedItems={setSelectedItems}/>
           <LandmarkEdit
             imageDict={imageDict}
             landmarkDict={landmarkDict}
-            currentDay={currentDay}
+            setLandmarkDict={setLandmarkDict}
+            currentTime={currentTime}
           />
         </div>
 
@@ -197,7 +202,7 @@ export default function Home() {
         <div className="bottom-0 right-0 flex h-full min-w-[300px] flex-col bg-white">
           {/* 可視画像 */}
           <img
-            src={imageDict[`${currentDay}_visible_image.png`]}
+            src={imageDict[`${currentTime}_visible_image.png`]}
             width={640 * 1 / 2}
             height={480 * 1 / 2}
           />
@@ -206,15 +211,21 @@ export default function Home() {
             {Object.keys(directoryStructure).length > 0 ? (
               <DirectoryAccordion
                 directoryStructure={directoryStructure}
-                currentDay={currentDay}
-                setCurrentDay={setCurrentDay}
+                currentTime={currentTime}
+                setcurrentTime={setcurrentTime}
               />
             ) : (
               <div>フォルダがありません</div>
             )}
             <div className="absolute bottom-0 flex w-full items-center justify-between p-2 bg-blue-50">
               <div className="">あ</div>
-              <Button className="bg-blue-500">保存</Button>
+              <Button 
+                onClick={() => handleSave(landmarkDict, selectedItems, currentTime)}
+                disabled={selectedItems.length === 0 || files === undefined}
+                className="bg-blue-500 hover:bg-blue-700 transition-all"
+              >
+                保存
+              </Button>
             </div>
           </div>
         </div>
