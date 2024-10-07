@@ -5,6 +5,7 @@ export const handleSave = (
   currentTime: string, // 現在の日時
   csvList: string[],
 ) => {
+  console.log(selectedItems)
   // 現在のランドマークデータと選択されたアイテムを取得
   const thermo_landmark = landmarkDict[`${currentTime}.csv`] || {};
 

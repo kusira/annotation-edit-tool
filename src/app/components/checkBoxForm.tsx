@@ -3,7 +3,7 @@ import React, { Dispatch, useEffect, useState } from "react";
 interface SelectedState {
   face: boolean;
   glasses: boolean;
-  bread: boolean;
+  beard: boolean;
   fullmask: boolean;
   chinmask: boolean;
   other: boolean;
@@ -14,7 +14,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
   const [selected, setSelected] = useState<SelectedState>({
     face: false,
     glasses: false,
-    bread: false,
+    beard: false,
     fullmask: false,
     chinmask: false,
     other: false,
@@ -29,7 +29,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
       setSelected({
         face: true,
         glasses: false,
-        bread: false,
+        beard: false,
         fullmask: false,
         chinmask: false,
         other: false,
@@ -38,7 +38,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
       setSelected({
         face: false,
         glasses: false,
-        bread: false,
+        beard: false,
         fullmask: false,
         chinmask: false,
         other: true,
@@ -64,7 +64,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
     const items = [];
     if (selected.face) items.push("face");
     if (selected.glasses) items.push("glasses");
-    if (selected.bread) items.push("bread");
+    if (selected.beard) items.push("beard");
     if (selected.fullmask) items.push("full_mask");
     if (selected.chinmask) items.push("chin_mask");
     if (selected.other) items.push("other");
@@ -81,7 +81,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
     setSelected({
       face: false,
       glasses: false,
-      bread: false,
+      beard: false,
       fullmask: false,
       chinmask: false,
       other: false,
@@ -96,7 +96,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
           setSelected({
             face: !selected.face,
             glasses: false,
-            bread: false,
+            beard: false,
             fullmask: false,
             chinmask: false,
             other: false,
@@ -113,7 +113,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
         if (!selected.face && !selected.other) {
           setSelected((prevState) => ({
             ...prevState,
-            bread: !prevState.bread,
+            beard: !prevState.beard,
           }));
         }
       } else if (e.key === "3") {
@@ -121,7 +121,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
           setSelected({
             face: false,
             glasses: false,
-            bread: false,
+            beard: false,
             fullmask: !selected.fullmask,
             chinmask: false,
             other: false,
@@ -132,7 +132,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
           setSelected({
             face: false,
             glasses: false,
-            bread: false,
+            beard: false,
             fullmask: false,
             chinmask: !selected.chinmask,
             other: false,
@@ -142,7 +142,7 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
         setSelected({
           face: false, // 'other' がONの時は 'face' をOFF
           glasses: false,
-          bread: false,
+          beard: false,
           fullmask: false,
           chinmask: false,
           other: !selected.other,
@@ -184,13 +184,13 @@ const CheckBoxForm = ({currentTime, setSelectedItems} : {currentTime: string, se
       <div>
         <input
           type="checkbox"
-          id="bread"
-          name="bread"
-          checked={selected.bread}
+          id="beard"
+          name="beard"
+          checked={selected.beard}
           onChange={handleChange}
           disabled={selected.face || selected.other} // faceまたはotherがONの時は無効化
         />
-        <label htmlFor="bread" className="cursor-pointer pl-2">2: Bread</label>
+        <label htmlFor="beard" className="cursor-pointer pl-2">2: beard</label>
       </div>
       <div>
         <input
