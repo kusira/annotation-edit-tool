@@ -40,7 +40,7 @@ const DirectoryAccordion = ({
           </div>
           {openIndexes.includes(index) && (
             <div>
-              <ul className="max-h-64 overflow-y-auto">
+              <ul>
                 {Object.keys(directoryStructure[date]).map((time) => {
                   const item = directoryStructure[date][time];
                   // dataオブジェクトのcsv_dataが存在する場合のみリストに表示
