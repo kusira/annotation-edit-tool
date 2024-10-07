@@ -138,20 +138,27 @@ export default function Home() {
   // 特徴点辞書 (非同期処理)
   const handleLandmarkDictionary = async (filteredFiles: File[]) => {
     const tempLandmarkDict: { [key: string]: number[][] } = {};
-
-    const tmpCsvDict: { [key: string]: string[] } = {}
+    const tmpCsvDict: { [key: string]: string[] } = {};
+  
+    // ディレクトリ名を指定
+    const targetDirectory = "csv_data_EditThermoLandmark";
+  
     await Promise.all(
       filteredFiles.map(async (file) => {
-        if (file.name.endsWith(".csv")) { // CSVファイルをフィルタリング
+        // CSVファイルでかつ、指定のディレクトリにあるものをフィルタリング
+        if (file.name.endsWith(".csv") && file.webkitRelativePath.includes(targetDirectory)) {
           const reader = new FileReader();
           const filePromise = new Promise<void>((resolve) => {
             reader.onload = (event) => {
               const csvContent = event.target?.result as string;
               const lines = csvContent.split("\n");
-              const key = file.webkitRelativePath.split("/")[3]; // 辞書のキーを形成
+  
+              // ファイルのパスから、キーに使う部分を抽出
+              const key = file.webkitRelativePath.split("/")[3]; // 適切にパスを分割し、キーを取得
+  
               // キーにcsvデータを追加
-              tmpCsvDict[key] = lines
-
+              tmpCsvDict[key] = lines;
+  
               lines.forEach((line) => {
                 // thermo_landmark以降の部分を抽出
                 const thermoLandmarkIndex = line.indexOf("thermo_landmark");
@@ -171,17 +178,18 @@ export default function Home() {
               resolve();
             };
           });
-
+  
           reader.readAsText(file); // CSVファイルをテキストとして読み込む
           await filePromise;
         }
       })
     );
-
+  
     setLandmarkDict(tempLandmarkDict);
     // console.log("--- landmark dict ---");
     // console.log(JSON.stringify(tempLandmarkDict, null, 2));
   };
+  
 
   return (
     <div 
